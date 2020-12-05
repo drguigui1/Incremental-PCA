@@ -108,3 +108,57 @@ func TestSignSlice(t *testing.T) {
 		t.Errorf("ref %v\n", ref)
 	}
 }
+
+func TestMultiplyVec1(t *testing.T) {
+	test := mat.NewDense(4, 3, []float64{
+		-3, 4, 5,
+		11, 6, 7,
+		6, -9, 7,
+		0, 6, 7,
+	})
+
+	v := []float64{0, 1, 2}
+	axis := 0
+
+	ref := mat.NewDense(4, 3, []float64{
+		0, 4, 10,
+		0, 6, 14,
+		0, -9, 14,
+		0, 6, 14,
+	})
+
+	MultiplyVec(test, v, axis)
+
+	if !reflect.DeepEqual(ref, test) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", test)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestMultiplyVec2(t *testing.T) {
+	test := mat.NewDense(4, 3, []float64{
+		-3, 4, 5,
+		11, 6, 7,
+		6, -9, 7,
+		0, 6, 7,
+	})
+
+	v := []float64{0, 1, 2, 0}
+	axis := 1
+
+	ref := mat.NewDense(4, 3, []float64{
+		0, 0, 0,
+		11, 6, 7,
+		12, -18, 14,
+		0, 0, 0,
+	})
+
+	MultiplyVec(test, v, axis)
+
+	if !reflect.DeepEqual(ref, test) {
+		t.Errorf("Error test2\n")
+		t.Errorf("res %v\n", test)
+		t.Errorf("ref %v\n", ref)
+	}
+}

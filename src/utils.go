@@ -242,16 +242,24 @@ func SignSlice(s []float64) []float64 {
 **  1, 2, 3,   *   [ 1, 2, 3 ] =    1, 4, 9,
 **  4, 5, 6                         4, 10, 18
 **  ]                              ]
-*/
-func MultiplyVec(m mat.Dense, v []float64, axis int) {
-    // TODO
-}
-
-/*
 **
+** Operations are done in place
 */
-func IncrementalMeanAndVar() {
-    // TODO
+func MultiplyVec(m *mat.Dense, v []float64, axis int) {
+    nSamples, nFeatures := m.Dims()
+    var idx int
+
+    for i := 0; i < nSamples; i++ {
+        for j := 0; j < nFeatures; j++ {
+            if axis == 1 {
+                idx = i
+            } else {
+                idx = j
+            }
+
+            m.Set(i, j, m.At(i, j) * v[idx])
+        }
+    }
 }
 
 /*
@@ -266,5 +274,15 @@ func IncrementalMeanAndVar() {
 ** No return because 'SvdFlip' is making operations in place
 */
 func SvdFlip(u, vt *mat.Dense) {
+    maxVec := GetAbsoluteMax(vt, 1)
+    signedMaxVec := SignSlice(maxVec)
+    MultiplyVec(u, signedMaxVec, 0)
+    MultiplyVec(vt, signedMaxVec, 1)
+}
+
+/*
+**
+*/
+func IncrementalMeanAndVar() {
     // TODO
 }
