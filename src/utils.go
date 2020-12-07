@@ -292,6 +292,34 @@ func Sum2Slices(slice1 []float64, slice2 []float64) []float64 {
 }
 
 /*
+** Mult two slice
+*/
+func Mult2Slices(slice1 []float64, slice2 []float64) []float64 {
+    m := len(slice1)
+    res := make([]float64, m)
+
+    for i := 0; i < m; i++ {
+        res[i] = slice1[i] * slice2[i]
+    }
+
+    return res
+}
+
+/*
+** Sub two slice
+*/
+func Sub2Slices(slice1 []float64, slice2 []float64) []float64 {
+    m := len(slice1)
+    res := make([]float64, m)
+
+    for i := 0; i < m; i++ {
+        res[i] = slice1[i] - slice2[i]
+    }
+
+    return res
+}
+
+/*
 ** Add a constant value to a slice
 */
 func AddConstToSlice(slice []float64, val float64) []float64 {
@@ -328,8 +356,8 @@ func DivSliceByConst(slice []float64, val float64) []float64 {
 ** axis = 0 -> sum for each column (len(result) == n_features)
 ** axis = 1 -> sum for each rows
 */
-func SumMat(m *mat.Dense, axis int) []float64 {
-    nSamples, nFeatures := m.Dims()
+func SumMat(m [][]float64, axis int) []float64 {
+    nSamples, nFeatures := len(m), len(m[0])
 
     var res []float64
     var idx int
@@ -347,7 +375,7 @@ func SumMat(m *mat.Dense, axis int) []float64 {
                 idx = j
             }
 
-            res[idx] += m.At(i, j)
+            res[idx] += m[i][j]
         }
     }
     return res
@@ -355,12 +383,69 @@ func SumMat(m *mat.Dense, axis int) []float64 {
 
 /*
 ** Compute variance over specific axis
-** axis = 0 -> variance for each column (len(result) == n_features)
-** axis = 1 -> variance for each rows
+** axis = 1 -> compute variance for each rows (len(res) = nSamples)
+** axis = 0 -> compute variance for each columns (len(res) = nFeatures)
 */
-func VarMat(m *mat.Dense, axis int) []float64 {
-    // TODO
-    return nil
+func VarMat(m [][]float64, axis int) []float64 {
+    nSamples, nFeatures := len(m), len(m[0])
+
+    var res []float64
+    var mean []float64
+    var sumSquareDiff []float64
+    var cpt int = 1
+    var idx int
+    var idxOther int
+
+    if axis == 0 {
+        res = make([]float64, nFeatures)
+        mean = make([]float64, nFeatures)
+        sumSquareDiff = make([]float64, nFeatures)
+    } else {
+        res = make([]float64, nSamples)
+        mean = make([]float64, nSamples)
+        sumSquareDiff = make([]float64, nSamples)
+    }
+
+    for i := 0; i < nSamples; i++ {
+        if axis == 1 {
+            cpt = 1
+        }
+        for j := 0; j < nFeatures; j++ {
+            elm := m[i][j]
+
+            if axis == 0 {
+                idx = j
+                idxOther = i
+            } else {
+                idx = i
+                idxOther = j
+            }
+
+            if idxOther == 0 {
+                // First elm case
+                mean[idx] = elm
+                sumSquareDiff[idx] = 0.
+            } else {
+                // Incrementaly update mean
+				newMean := mean[idx] + (elm - mean[idx]) / float64(cpt)
+
+				// Incrementaly update sum square diff
+                newSumSquare := sumSquareDiff[idx] + (elm - mean[idx]) * (elm - newMean)
+
+                mean[idx] = newMean
+                sumSquareDiff[idx] = newSumSquare
+
+                res[idx] = newSumSquare / float64(cpt)
+            }
+            if axis == 1 {
+                cpt++
+            }
+        }
+        if axis == 0 {
+            cpt++
+        }
+    }
+    return res
 }
 
 /*
@@ -391,6 +476,41 @@ func SvdFlip(u, vt *mat.Dense) {
 ** From the paper "Algorithms for computing the sample variance: analysis and
 ** recommendations", by Chan, Golub, and LeVeque.
 */
-func IncrementalMeanAndVar(data [][]float64) {
-    // TODO
+func IncrementalMeanAndVar(data [][]float64,
+                           lastMean, lastVar []float64,
+                           lastSampleCount int) ([]float64, []float64, int) {
+    newSampleCount := len(data)
+
+    // get the last sum
+    lastSum := MultSliceByConst(lastMean, float64(lastSampleCount))
+
+    // sum over the axis 0
+    newSum := SumMat(data, 0)
+
+    // update the sample count
+    updatedSampleCount := lastSampleCount + newSampleCount
+
+    // update mean
+    updatedMean := DivSliceByConst(Sum2Slices(lastSum, newSum), float64(updatedSampleCount))
+
+    // compute variance over the axis 0
+    newUnnormalizedVariance := MultSliceByConst(VarMat(data, 0), float64(newSampleCount))
+
+    lastUnnormalizedVariance := MultSliceByConst(lastVar, float64(lastSampleCount))
+    lastOverNewCount := float64(lastSampleCount) / float64(newSampleCount)
+
+
+    // updated normalized variance
+    sumUnormalized := Sum2Slices(lastUnnormalizedVariance, newUnnormalizedVariance)
+    divCount := float64(lastOverNewCount) / float64(updatedSampleCount)
+    divSum := DivSliceByConst(lastSum, lastOverNewCount)
+    subSum := Sub2Slices(divSum, newSum)
+    squareSum := Mult2Slices(subSum, subSum)
+    tmp := MultSliceByConst(squareSum, divCount)
+    updatedUnormalizedVariance := Sum2Slices(sumUnormalized, tmp)
+
+    // update the variance
+    updatedVariance := DivSliceByConst(updatedUnormalizedVariance, float64(updatedSampleCount))
+
+    return updatedMean, updatedVariance, updatedSampleCount
 }

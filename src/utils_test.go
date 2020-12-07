@@ -164,12 +164,12 @@ func TestMultiplyVec2(t *testing.T) {
 }
 
 func TestSumMat1(t *testing.T) {
-	test := mat.NewDense(4, 3, []float64{
-		-3, 4, 5,
-		11, 6, 7,
-		6, -9, 7,
-		0, 6, 7,
-	})
+	test := [][]float64{
+		{ -3, 4, 5 },
+		{ 11, 6, 7 },
+		{ 6, -9, 7 },
+		{ 0, 6, 7  },
+	}
 
 	axis := 1
 
@@ -185,12 +185,12 @@ func TestSumMat1(t *testing.T) {
 }
 
 func TestSumMat2(t *testing.T) {
-	test := mat.NewDense(4, 3, []float64{
-		-3, 4, 5,
-		11, 6, 7,
-		6, -9, 7,
-		0, 6, 7,
-	})
+	test := [][]float64{
+		{ -3, 4, 5 },
+		{ 11, 6, 7 },
+		{ 6, -9, 7 },
+		{ 0, 6, 7  },
+	}
 
 	axis := 0
 
@@ -200,6 +200,65 @@ func TestSumMat2(t *testing.T) {
 
 	if !reflect.DeepEqual(ref, res) {
 		t.Errorf("Error test2\n")
+		t.Errorf("res %v\n", res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestVarMat1(t *testing.T) {
+	test := [][]float64{
+		{1, 2, 3},
+		{4, 5, 6},
+		{7, 8, 9},
+		{1, 1, 1},
+	}
+
+	axis := 0
+	ref := []float64{6.1875, 7.5, 9.1875}
+
+	res := VarMat(test, axis)
+
+	if !reflect.DeepEqual(ref, res) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestVarMat2(t *testing.T) {
+	test := [][]float64{
+		{1, 2, 3},
+		{4, 5, 6},
+		{7, 8, 9},
+		{1, 1, 1},
+	}
+
+	axis := 1
+	ref := []float64{0.6666666666666666, 0.6666666666666666, 0.6666666666666666, 0.}
+
+	res := VarMat(test, axis)
+
+	if !reflect.DeepEqual(ref, res) {
+		t.Errorf("Error test2\n")
+		t.Errorf("res %v\n", res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestVarMat3(t *testing.T) {
+	test := [][]float64{
+		{ 55, 0, 150 },
+		{  0, 12, 99 },
+		{ -5, 15, 0  },
+	}
+
+	axis := 0
+	ref := []float64{738.8888888888888, 42., 3878.}
+
+	res := VarMat(test, axis)
+
+	if !reflect.DeepEqual(ref, res) {
+		t.Errorf("Error test3\n")
 		t.Errorf("res %v\n", res)
 		t.Errorf("ref %v\n", ref)
 	}
