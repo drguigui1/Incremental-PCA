@@ -8,6 +8,7 @@ import (
 	"strconv"
     "gonum.org/v1/gonum/mat"
     "math"
+    "log"
 )
 
 /*
@@ -263,6 +264,106 @@ func MultiplyVec(m *mat.Dense, v []float64, axis int) {
 }
 
 /*
+** Multiply slice by const flaot64
+*/
+func MultSliceByConst(slice []float64, val float64) []float64 {
+    m := len(slice)
+    res := make([]float64, m)
+
+    for i := 0; i < m; i++ {
+        res[i] = slice[i] * val
+    }
+
+    return res
+}
+
+/*
+** Sum two slice
+*/
+func Sum2Slices(slice1 []float64, slice2 []float64) []float64 {
+    m := len(slice1)
+    res := make([]float64, m)
+
+    for i := 0; i < m; i++ {
+        res[i] = slice1[i] + slice2[i]
+    }
+
+    return res
+}
+
+/*
+** Add a constant value to a slice
+*/
+func AddConstToSlice(slice []float64, val float64) []float64 {
+    m := len(slice)
+    res := make([]float64, m)
+
+    for i := 0; i < m; i++ {
+        res[i] = slice[i] + val
+    }
+
+    return res
+}
+
+/*
+** Divide slice by a constant
+*/
+func DivSliceByConst(slice []float64, val float64) []float64 {
+    if val == 0. {
+        log.Fatalf("Error cannot divide by 0")
+    }
+
+    m := len(slice)
+    res := make([]float64, m)
+
+    for i := 0; i < m; i++ {
+        res[i] = slice[i] / val
+    }
+
+    return res
+}
+
+/*
+** Sum elements of the dense matrix over a specific axis
+** axis = 0 -> sum for each column (len(result) == n_features)
+** axis = 1 -> sum for each rows
+*/
+func SumMat(m *mat.Dense, axis int) []float64 {
+    nSamples, nFeatures := m.Dims()
+
+    var res []float64
+    var idx int
+    if axis == 1 {
+        res = make([]float64, nSamples)
+    } else {
+        res = make([]float64, nFeatures)
+    }
+
+    for i := 0; i < nSamples; i++ {
+        for j := 0; j < nFeatures; j++ {
+            if axis == 1 {
+                idx = i
+            } else {
+                idx = j
+            }
+
+            res[idx] += m.At(i, j)
+        }
+    }
+    return res
+}
+
+/*
+** Compute variance over specific axis
+** axis = 0 -> variance for each column (len(result) == n_features)
+** axis = 1 -> variance for each rows
+*/
+func VarMat(m *mat.Dense, axis int) []float64 {
+    // TODO
+    return nil
+}
+
+/*
 ** Sign correction to ensure deterministic output from SVD.
 ** Adjusts the columns of u and the rows of v such that the loadings in the
 ** columns in u that are largest in absolute value are always positive.
@@ -281,8 +382,15 @@ func SvdFlip(u, vt *mat.Dense) {
 }
 
 /*
-**
+** Calculate mean update and a Youngs and Cramer variance update.
+** last_mean and last_variance are statistics computed at the last step by the
+** function. Both must be initialized to 0.0. In case no scaling is required
+** last_variance can be None. The mean is always required and returned because
+** necessary for the calculation of the variance. last_n_samples_seen is the
+** number of samples encountered until now.
+** From the paper "Algorithms for computing the sample variance: analysis and
+** recommendations", by Chan, Golub, and LeVeque.
 */
-func IncrementalMeanAndVar() {
+func IncrementalMeanAndVar(data [][]float64) {
     // TODO
 }

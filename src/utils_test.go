@@ -162,3 +162,45 @@ func TestMultiplyVec2(t *testing.T) {
 		t.Errorf("ref %v\n", ref)
 	}
 }
+
+func TestSumMat1(t *testing.T) {
+	test := mat.NewDense(4, 3, []float64{
+		-3, 4, 5,
+		11, 6, 7,
+		6, -9, 7,
+		0, 6, 7,
+	})
+
+	axis := 1
+
+	ref := []float64{6, 24, 4, 13}
+
+	res := SumMat(test, axis)
+
+	if !reflect.DeepEqual(ref, res) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestSumMat2(t *testing.T) {
+	test := mat.NewDense(4, 3, []float64{
+		-3, 4, 5,
+		11, 6, 7,
+		6, -9, 7,
+		0, 6, 7,
+	})
+
+	axis := 0
+
+	ref := []float64{14, 7, 26}
+
+	res := SumMat(test, axis)
+
+	if !reflect.DeepEqual(ref, res) {
+		t.Errorf("Error test2\n")
+		t.Errorf("res %v\n", res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
