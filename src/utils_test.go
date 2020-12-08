@@ -301,3 +301,186 @@ func TestMeanMat2(t *testing.T) {
 		t.Errorf("ref %v\n", ref)
 	}
 }
+
+func TestMultMatByVec1(t *testing.T) {
+	test := [][]float64{
+		{ 1,2,3 },
+		{ 5,1,4 },
+		{ 8,6,4 },
+		{ 8,6,4 },
+	}
+
+	vec := []float64{1, 2, 3}
+
+	axis := 0
+
+	ref := [][]float64{
+		{ 1,4,9 },
+		{ 5,2,12 },
+		{ 8,12,12 },
+		{ 8,12,12 },
+	}
+
+
+	res := MultMatByVec(test, vec, axis)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestMultMatByVec2(t *testing.T) {
+	test := [][]float64{
+		{ 1,2,3 },
+		{ 5,1,4 },
+		{ 8,6,4 },
+		{ 8,6,4 },
+	}
+
+	vec := []float64{1, 2, 3, 0.5}
+
+	axis := 1
+
+	ref := [][]float64{
+		{ 1,2,3 },
+		{ 10,2,8 },
+		{ 24,18,12 },
+		{ 4,3,2 },
+	}
+
+
+	res := MultMatByVec(test, vec, axis)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test2\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestVstack1(t *testing.T) {
+	m1 := [][]float64{
+		{ 1,2,3 },
+		{ 5,1,4 },
+	}
+
+	m2 := [][]float64{
+		{ 1,2,3 },
+		{ 5,1,4 },
+		{ 5,8,4 },
+	}
+
+	m3 := [][]float64{
+		{ 0,2,3 },
+	}
+
+	ref := [][]float64{
+		{ 1,2,3 },
+		{ 5,1,4 },
+		{ 1,2,3 },
+		{ 5,1,4 },
+		{ 5,8,4 },
+		{ 0,2,3 },
+	}
+
+
+	res := Vstack(m1, m2, m3)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestVstack2(t *testing.T) {
+	m1 := [][]float64{
+		{ 1,2,3 },
+	}
+
+	m2 := [][]float64{
+		{ 5,8,4 },
+	}
+
+	m3 := [][]float64{
+		{ 0,2,3 },
+	}
+
+	ref := [][]float64{
+		{ 1,2,3 },
+		{ 5,8,4 },
+		{ 0,2,3 },
+	}
+
+
+	res := Vstack(m1, m2, m3)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test2\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestMultVecAndSum1(t *testing.T) {
+	test := []float64{1,2,3,4,5,6}
+	var val float64 = 2
+
+	var ref float64 = 42
+
+	res := MultVecAndSum(test, val)
+
+	if ref != res {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestExtractComponents1(t *testing.T) {
+	test := mat.NewDense(6, 3, []float64{
+		3, 4, 5,
+		6, 0, 7,
+		1, 6, 12,
+		6, 4, 15,
+		6, 4, 15,
+		6, 4, 15,
+	})
+
+	nComponents := 3
+	ref := [][]float64{
+		{3, 4, 5},
+		{6, 0, 7},
+		{1, 6, 12},
+	}
+
+	res := ExtractComponents(test, nComponents)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestExtractComponents2(t *testing.T) {
+	test := mat.NewDense(2, 7, []float64{
+		3, 4, 5, 6, 8, 32, 2,
+		6, 0, 7, 4.3, 6.6, 1., 6,
+	})
+
+	nComponents := 1
+	ref := [][]float64{
+		{3, 4, 5, 6, 8, 32, 2},
+	}
+
+	res := ExtractComponents(test, nComponents)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test2\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}

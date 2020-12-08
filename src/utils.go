@@ -133,7 +133,7 @@ func ToFloat64Slices(slice *[][]string) *[][]float64 {
 }
 
 /*
-**
+** NOT WORKING
 */
 func FromSliceToMat(slice *[][]string) *mat.Dense {
 	n_samples := len((*slice))
@@ -155,6 +155,25 @@ func FromSliceToMat(slice *[][]string) *mat.Dense {
 	}
 
 	return mat.NewDense(n_samples, n_dims, *data)
+}
+
+/*
+**
+*/
+func FromSliceFloatToMat(slice *[][]float64) *mat.Dense {
+	n_samples := len((*slice))
+	n_dims := len((*slice)[0])
+
+	// flatten and convert the data
+	data := make([]float64, n_samples * n_dims)
+
+	for i := 0; i < n_samples; i++ {
+        for j := 0; j < n_dims; j++ {
+            data[i * n_dims + j] = (*slice)[i][j]
+        }
+	}
+
+	return mat.NewDense(n_samples, n_dims, data)
 }
 
 /*
@@ -261,6 +280,43 @@ func MultiplyVec(m *mat.Dense, v []float64, axis int) {
             m.Set(i, j, m.At(i, j) * v[idx])
         }
     }
+}
+
+/*
+** Multiply 'm' by the vector 'v' along specific axis in place
+**
+** ex (axis = 1):
+** [               [           [
+**  1, 2, 3,   *     2,   =      2, 4, 6,
+**  4, 5, 6          3           12, 15, 18
+**  ]                ]          ]
+**
+** ex (axis = 0):
+** [                              [
+**  1, 2, 3,   *   [ 1, 2, 3 ] =    1, 4, 9,
+**  4, 5, 6                         4, 10, 18
+**  ]                              ]
+**
+** Operations are done in place
+*/
+func MultMatByVec(m [][]float64, v []float64, axis int) *[][]float64 {
+    nSamples, nFeatures := len(m), len(m[0])
+    res := InitSlicesFloat64(nSamples, nFeatures)
+    var idx int
+
+    for i := 0; i < nSamples; i++ {
+        for j := 0; j < nFeatures; j++ {
+            if axis == 1 {
+                idx = i
+            } else {
+                idx = j
+            }
+
+            (*res)[i][j] = m[i][j] * v[idx]
+        }
+    }
+
+    return res
 }
 
 /*
@@ -521,6 +577,64 @@ func SubVecToMatInPlace(m *[][]float64, v[]float64, axis int) {
             (*m)[i][j] -= v[idx]
         }
     }
+}
+
+/*
+** vstack (vertical stack) of 3 matrix
+**
+*/
+func Vstack(m1 [][]float64, m2 [][]float64, m3 [][]float64) *[][]float64 {
+    nFeatures := len(m1[0])
+    nSamples1 := len(m1)
+    nSamples2 := len(m2)
+    nSamples3 := len(m3)
+    nTotal := nSamples1 + nSamples2 + nSamples3
+
+    res := InitSlicesFloat64(nTotal, nFeatures)
+
+
+    for i := 0; i < nTotal; i++ {
+        for j := 0; j < nFeatures; j++ {
+            if i >= nSamples1 + nSamples2 {
+                (*res)[i][j] = m3[i - nSamples1 - nSamples2][j]
+            } else if i >= nSamples1 {
+                (*res)[i][j] = m2[i - nSamples1][j]
+            } else {
+                (*res)[i][j] = m1[i][j]
+            }
+        }
+    }
+
+    return res
+}
+
+/*
+** Mult vec by const and sum all the values
+*/
+func MultVecAndSum(vec []float64, val float64) float64 {
+    var res float64 = 0
+    for _, elm := range vec {
+        res += elm * val
+    }
+
+    return res
+}
+
+/*
+** Extract components from 'vt'
+** vt -> shape = (nSamples, nFeatures)
+** We want to extract the first 'nComponents'
+*/
+func ExtractComponents(vt *mat.Dense, nComponents int) *[][]float64 {
+    _, nFeatures := vt.Dims()
+    res := InitSlicesFloat64(nComponents, nFeatures)
+
+    for i := 0; i < nComponents; i++ {
+        for j := 0; j < nFeatures; j++ {
+            (*res)[i][j] = vt.At(i, j)
+        }
+    }
+    return res
 }
 
 /*

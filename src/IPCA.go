@@ -1,8 +1,9 @@
 package main
 
 import (
-	//"gonum.org/v1/gonum/mat"
-	"math"
+	"gonum.org/v1/gonum/mat"
+    "math"
+    "log"
 )
 
 /*
@@ -36,6 +37,9 @@ type IPCA struct {
 
 }
 
+/*
+** Initialization of the Incremental PCA model
+*/
 func InitIncrementalPCA(nComponents, nFeatures int) *IPCA {
 	// set mean and var to slice of 0
 	mean := make([]float64, nFeatures)
@@ -52,6 +56,10 @@ func InitIncrementalPCA(nComponents, nFeatures int) *IPCA {
 	return &newIPCA
 }
 
+/*
+** Partial Fit on the batch of data
+** Update parameters of the incremental PCA
+*/
 func (ipca *IPCA) PartialFit(data *[][]float64) {
 	nSamples := len(*data)
 
@@ -60,23 +68,55 @@ func (ipca *IPCA) PartialFit(data *[][]float64) {
 
 	// first path
 	if ipca.nSampleSeen_ == 0 {
+        // data is directly modified in place
 		SubVecToMatInPlace(data, colMean, 0)
 	} else {
 		// compute col_batch_mean
-		colBatchMean := MeanMat(*data, 0)
+        colBatchMean := MeanMat(*data, 0)
+        // data is directly modified in place
 		SubVecToMatInPlace(data, colBatchMean, 0)
 
 		// mean correction
 		sqrtTmp := math.Sqrt((float64(ipca.nSampleSeen_) / float64(nTotalSamples)) * float64(nSamples))
-		meanCorrection := MultSliceByConst(Sub2Slices(ipca.mean_, colBatchMean), sqrtTmp)
+		meanCorrectionTmp := MultSliceByConst(Sub2Slices(ipca.mean_, colBatchMean), sqrtTmp)
 
 		// vstack
+        multCompSingValues := MultMatByVec(ipca.components_, ipca.singularValues_, 1)
+        meanCorrection := [][]float64{ meanCorrectionTmp }
+        data = Vstack(*multCompSingValues, *data, meanCorrection)
 	}
 
-	// TODO
-	// SVD
-	// explained variance / explained variance ratio
-	// set vars
+    // convert data into Dense
+    dataDense := FromSliceFloatToMat(data)
+
+    // SVD
+    var svd mat.SVD
+	ok := svd.Factorize(dataDense, mat.SVDThin)
+
+	if !ok {
+    	log.Fatal("SVD Decomposition failed")
+	}
+	var u, v mat.Dense
+	svd.UTo(&u)
+    svd.VTo(&v)
+    vt := mat.DenseCopyOf(v.T())
+    values := svd.Values(nil)
+    SvdFlip(&u, vt)
+
+    // explained variance / explained variance ratio
+    squareValues := Mult2Slices(values, values)
+    explainedVariance := DivSliceByConst(squareValues, float64(nTotalSamples - 1))
+    explainedVarianceRatio := DivSliceByConst(squareValues, MultVecAndSum(colVar, float64(nTotalSamples)))
+
+    // set vars
+    ipca.nSampleSeen_ = nTotalSamples
+    ipca.components_ = *ExtractComponents(vt, ipca.nComponents_)
+    //ipca.components_ = Vt[:ipca.nComponents_]
+    ipca.singularValues_ = values[:ipca.nComponents_]
+    ipca.mean_ = colMean
+    ipca.var_ = colVar
+    ipca.explainedVariance_ = explainedVariance
+    ipca.explainedVarianceRatio_ = explainedVarianceRatio
 }
 
 func (ipca *IPCA) Transform(data *[][]float64) {
