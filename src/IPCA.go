@@ -23,21 +23,32 @@ import (
 **
 */
 type IPCA struct {
-	nFeatures_ uint
-	nComponents_ uint
-	nSampleSeen_ uint
+	nFeatures_ int
+	nComponents_ int
+	nSampleSeen_ int
 	mean_ []float64
 	var_ []float64
-	components_ mat.Dense
+	components_ [][]float64
 	singularValues_ []float64
 	explainedVariance_ []float64
 	explainedVarianceRatio_ []float64
 
 }
 
-func InitIncrementalPCA(nComponents int) *IPCA {
-	// TODO
-	return nil
+func InitIncrementalPCA(nComponents, nFeatures int) *IPCA {
+	// set mean and var to slice of 0
+	mean := make([]float64, nFeatures)
+	variance := make([]float64, nFeatures)
+	components := InitSlicesFloat64(nComponents, nFeatures)
+	singularValues := make([]float64, nComponents)
+	explainedVariance := make([]float64, nComponents)
+	explainedVarianceRatio := make([]float64, nComponents)
+
+	newIPCA := IPCA{nFeatures, nComponents, 0,
+					mean, variance, *components,
+					singularValues, explainedVariance,
+					explainedVarianceRatio}
+	return &newIPCA
 }
 
 func (ipca *IPCA) PartialFit(data *[][]float64) {
