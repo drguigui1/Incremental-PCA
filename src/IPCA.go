@@ -1,7 +1,8 @@
 package main
 
 import (
-	"gonum.org/v1/gonum/mat"
+	//"gonum.org/v1/gonum/mat"
+	"math"
 )
 
 /*
@@ -52,7 +53,30 @@ func InitIncrementalPCA(nComponents, nFeatures int) *IPCA {
 }
 
 func (ipca *IPCA) PartialFit(data *[][]float64) {
-    // TODO
+	nSamples := len(*data)
+
+	// compute mean and var incrementally
+	colMean, colVar, nTotalSamples := IncrementalMeanAndVar(*data, ipca.mean_, ipca.var_, ipca.nSampleSeen_)
+
+	// first path
+	if ipca.nSampleSeen_ == 0 {
+		SubVecToMatInPlace(data, colMean, 0)
+	} else {
+		// compute col_batch_mean
+		colBatchMean := MeanMat(*data, 0)
+		SubVecToMatInPlace(data, colBatchMean, 0)
+
+		// mean correction
+		sqrtTmp := math.Sqrt((float64(ipca.nSampleSeen_) / float64(nTotalSamples)) * float64(nSamples))
+		meanCorrection := MultSliceByConst(Sub2Slices(ipca.mean_, colBatchMean), sqrtTmp)
+
+		// vstack
+	}
+
+	// TODO
+	// SVD
+	// explained variance / explained variance ratio
+	// set vars
 }
 
 func (ipca *IPCA) Transform(data *[][]float64) {

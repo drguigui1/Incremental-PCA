@@ -230,7 +230,7 @@ func SignSlice(s []float64) []float64 {
 }
 
 /*
-** Multiply 'm' by the vector 'v' along specific axis
+** Multiply 'm' by the vector 'v' along specific axis in place
 **
 ** ex (axis = 1):
 ** [               [           [
@@ -382,6 +382,59 @@ func SumMat(m [][]float64, axis int) []float64 {
 }
 
 /*
+** Compute mean over specific axis
+** axis = 1 -> compute variance for each rows (len(res) = nSamples)
+** axis = 0 -> compute variance for each columns (len(res) = nFeatures)
+*/
+func MeanMat(m [][]float64, axis int) []float64 {
+    nSamples, nFeatures := len(m), len(m[0])
+    var mean []float64
+    var idx int
+    var idxOther int
+    var cpt int = 1
+
+    if axis == 0 {
+        mean = make([]float64, nFeatures)
+    } else {
+        mean = make([]float64, nSamples)
+    }
+
+    for i := 0; i < nSamples; i++ {
+        if axis == 1 {
+            cpt = 1
+        }
+        for j := 0; j < nFeatures; j++ {
+            elm := m[i][j]
+
+            if axis == 0 {
+                idx = j
+                idxOther = i
+            } else {
+                idx = i
+                idxOther = j
+            }
+
+            if idxOther == 0 {
+                // First elm case
+                mean[idx] = elm
+            } else {
+                // Incrementaly update mean
+				newMean := mean[idx] + (elm - mean[idx]) / float64(cpt)
+                mean[idx] = newMean
+            }
+            if axis == 1 {
+                cpt++
+            }
+        }
+        if axis == 0 {
+            cpt++
+        }
+    }
+    return mean
+
+}
+
+/*
 ** Compute variance over specific axis
 ** axis = 1 -> compute variance for each rows (len(res) = nSamples)
 ** axis = 0 -> compute variance for each columns (len(res) = nFeatures)
@@ -446,6 +499,28 @@ func VarMat(m [][]float64, axis int) []float64 {
         }
     }
     return res
+}
+
+/*
+** Substract a vector to a matrix over a specified axis in place
+** axis = 0 -> vector substraction for each row
+** axis = 1 -> vector substraction for each column
+*/
+func SubVecToMatInPlace(m *[][]float64, v[]float64, axis int) {
+    nSamples, nFeatures := len(*m), len((*m)[0])
+    var idx int
+
+    for i := 0; i < nSamples; i++ {
+        for j := 0; j < nFeatures; j++ {
+            if axis == 1 {
+                idx = i
+            } else {
+                idx = j
+            }
+
+            (*m)[i][j] -= v[idx]
+        }
+    }
 }
 
 /*

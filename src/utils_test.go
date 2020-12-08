@@ -263,3 +263,41 @@ func TestVarMat3(t *testing.T) {
 		t.Errorf("ref %v\n", ref)
 	}
 }
+
+func TestMeanMat1(t *testing.T) {
+	test := [][]float64{
+		{ 1,2,3 },
+		{ 5,1,4 },
+		{ 8,6,4 },
+	}
+
+	axis := 0
+	ref := []float64{4.666666666666667, 3, 3.6666666666666665}
+
+	res := MeanMat(test, axis)
+
+	if !reflect.DeepEqual(ref, res) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestMeanMat2(t *testing.T) {
+	test := [][]float64{
+		{ 1,2,3 },
+		{ 5,1,4 },
+		{ 8,6,4 },
+	}
+
+	axis := 1
+	ref := []float64{2., 3.3333333333333335, 6.}
+
+	res := MeanMat(test, axis)
+
+	if !reflect.DeepEqual(ref, res) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
