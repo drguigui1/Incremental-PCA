@@ -685,21 +685,24 @@ func IncrementalMeanAndVar(data [][]float64,
     // compute variance over the axis 0
     newUnnormalizedVariance := MultSliceByConst(VarMat(data, 0), float64(newSampleCount))
 
-    lastUnnormalizedVariance := MultSliceByConst(lastVar, float64(lastSampleCount))
-    lastOverNewCount := float64(lastSampleCount) / float64(newSampleCount)
+    var updatedUnormalizedVariance []float64
+    if lastSampleCount == 0 {
+        updatedUnormalizedVariance = newUnnormalizedVariance
+    } else {
+        lastUnnormalizedVariance := MultSliceByConst(lastVar, float64(lastSampleCount))
+        lastOverNewCount := float64(lastSampleCount) / float64(newSampleCount)
 
 
-    // updated normalized variance
-    sumUnormalized := Sum2Slices(lastUnnormalizedVariance, newUnnormalizedVariance)
-    divCount := float64(lastOverNewCount) / float64(updatedSampleCount)
-    divSum := DivSliceByConst(lastSum, lastOverNewCount)
-    subSum := Sub2Slices(divSum, newSum)
-    squareSum := Mult2Slices(subSum, subSum)
-    tmp := MultSliceByConst(squareSum, divCount)
-    updatedUnormalizedVariance := Sum2Slices(sumUnormalized, tmp)
-
+        // updated normalized variance
+        sumUnormalized := Sum2Slices(lastUnnormalizedVariance, newUnnormalizedVariance)
+        divCount := float64(lastOverNewCount) / float64(updatedSampleCount)
+        divSum := DivSliceByConst(lastSum, lastOverNewCount)
+        subSum := Sub2Slices(divSum, newSum)
+        squareSum := Mult2Slices(subSum, subSum)
+        tmp := MultSliceByConst(squareSum, divCount)
+        updatedUnormalizedVariance = Sum2Slices(sumUnormalized, tmp)
+    }
     // update the variance
     updatedVariance := DivSliceByConst(updatedUnormalizedVariance, float64(updatedSampleCount))
-
     return updatedMean, updatedVariance, updatedSampleCount
 }

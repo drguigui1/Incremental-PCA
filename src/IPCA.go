@@ -4,6 +4,7 @@ import (
 	"gonum.org/v1/gonum/mat"
     "math"
     "log"
+    "fmt"
 )
 
 /*
@@ -57,6 +58,19 @@ func InitIncrementalPCA(nComponents, nFeatures int) *IPCA {
 }
 
 /*
+** Pretty print of the model
+*/
+func (ipca *IPCA) Print() {
+    fmt.Println("nbSampleSeen: ", ipca.nSampleSeen_)
+    fmt.Println("components: ", ipca.components_)
+    fmt.Println("explained variance: ", ipca.explainedVariance_)
+    fmt.Println("explained variance ratio: ", ipca.explainedVarianceRatio_)
+    fmt.Println("singular values: ", ipca.singularValues_)
+    fmt.Println("mean: ", ipca.mean_)
+    fmt.Println("variance: ", ipca.var_)
+}
+
+/*
 ** Partial Fit on the batch of data
 ** Update parameters of the incremental PCA
 */
@@ -64,7 +78,10 @@ func (ipca *IPCA) PartialFit(data *[][]float64) {
 	nSamples := len(*data)
 
 	// compute mean and var incrementally
-	colMean, colVar, nTotalSamples := IncrementalMeanAndVar(*data, ipca.mean_, ipca.var_, ipca.nSampleSeen_)
+    colMean, colVar, nTotalSamples := IncrementalMeanAndVar(*data, ipca.mean_, ipca.var_, ipca.nSampleSeen_)
+    //fmt.Println(colMean)
+    //fmt.Println(colVar)
+    //fmt.Println(nTotalSamples)
 
 	// first path
 	if ipca.nSampleSeen_ == 0 {
@@ -77,8 +94,10 @@ func (ipca *IPCA) PartialFit(data *[][]float64) {
 		SubVecToMatInPlace(data, colBatchMean, 0)
 
 		// mean correction
-		sqrtTmp := math.Sqrt((float64(ipca.nSampleSeen_) / float64(nTotalSamples)) * float64(nSamples))
-		meanCorrectionTmp := MultSliceByConst(Sub2Slices(ipca.mean_, colBatchMean), sqrtTmp)
+        sqrtTmp := math.Sqrt((float64(ipca.nSampleSeen_) / float64(nTotalSamples)) * float64(nSamples))
+        //fmt.Println(Sub2Slices(ipca.mean_, colBatchMean))
+        meanCorrectionTmp := MultSliceByConst(Sub2Slices(ipca.mean_, colBatchMean), sqrtTmp)
+        //fmt.Println(meanCorrectionTmp)
 
 		// vstack
         multCompSingValues := MultMatByVec(ipca.components_, ipca.singularValues_, 1)
@@ -115,8 +134,8 @@ func (ipca *IPCA) PartialFit(data *[][]float64) {
     ipca.singularValues_ = values[:ipca.nComponents_]
     ipca.mean_ = colMean
     ipca.var_ = colVar
-    ipca.explainedVariance_ = explainedVariance
-    ipca.explainedVarianceRatio_ = explainedVarianceRatio
+    ipca.explainedVariance_ = explainedVariance[:ipca.nComponents_]
+    ipca.explainedVarianceRatio_ = explainedVarianceRatio[:ipca.nComponents_]
 }
 
 func (ipca *IPCA) Transform(data *[][]float64) {
