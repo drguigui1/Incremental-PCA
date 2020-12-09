@@ -3,6 +3,7 @@ package main
 import (
 	//"gonum.org/v1/gonum/mat"
 	//"log"
+	"fmt"
 )
 
 func main() {
@@ -12,64 +13,7 @@ func main() {
 	// convert data
 	//fmt.Println("Convert loaded data")
 	data := FromSliceToMat(&dataStr)
-
-	//fmt.Println("SVD Factorization")
-	var svd mat.SVD
-	ok := svd.Factorize(data, mat.SVDThin)
-
-	if !ok {
-		log.Fatal("SVD Decomposition failed")
-	}
-
-	//fmt.Println("Ready to get the data")
-	var u, v mat.Dense
-	svd.UTo(&u)
-	svd.VTo(&v)
-	values := svd.Values(nil)
-
-	//fmt.Println(u)
-	//fmt.Println(v)
-	fmt.Println(values)
-*/
-	/*a := mat.NewDense(4, 3, []float64{
-		3, 4, 5,
-		6, 6, 7,
-		6, 6, 7,
-		6, 6, 7,
-	})
-
-	fmt.Printf("A = %v\n\n", a)
-
-	var svd mat.SVD
-	ok := svd.Factorize(a, mat.SVDThin)
-	//var eig mat.Eigen
-	//var eigenVec mat.CDense
-
-	if !ok {
-    	log.Fatal("SVD Decomposition failed")
-	}
-	var u, v mat.Dense
-	svd.UTo(&u)
-	svd.VTo(&v)
-	//values := svd.Values(nil)
-
-	//tmp := mat.DenseCopyOf(v.T())
-    fmt.Println(u)
-    fmt.Println(u.RowView(0))
-    fmt.Println(u.RowView(1))
-    fmt.Println()
-	//fmt.Println(v)
-	//fmt.Println(values)
-    //fmt.Println(tmp)
-    */
-	/*n, m := tmp.Dims()
-	for i := 0; i < n; i++ {
-		for j := 0; j < m; j++ {
-			fmt.Printf("%v ", tmp.At(i, j))
-		}
-		fmt.Printf("\n")
-	}*/
-
+	*/
 	batch1 := [][]float64{
 		{2.3, 4.5, 6.6, 1.0, 5.5},
 		{5.5, 1.2, 0.54, 0.1, 1.1},
@@ -92,10 +36,15 @@ func main() {
 		{0,0,0,0.1,0},
 	}
 
+	data := [][]float64{
+		{1,2,3,4,5},
+	}
+
 	ipca := InitIncrementalPCA(2, 5)
 	ipca.PartialFit(&batch1)
 	ipca.PartialFit(&batch2)
 	ipca.PartialFit(&batch3)
 	ipca.PartialFit(&batch4)
-	ipca.Print()
+	//ipca.Print()
+	fmt.Println(ipca.Transform(&data))
 }

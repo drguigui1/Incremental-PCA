@@ -79,9 +79,6 @@ func (ipca *IPCA) PartialFit(data *[][]float64) {
 
 	// compute mean and var incrementally
     colMean, colVar, nTotalSamples := IncrementalMeanAndVar(*data, ipca.mean_, ipca.var_, ipca.nSampleSeen_)
-    //fmt.Println(colMean)
-    //fmt.Println(colVar)
-    //fmt.Println(nTotalSamples)
 
 	// first path
 	if ipca.nSampleSeen_ == 0 {
@@ -138,7 +135,10 @@ func (ipca *IPCA) PartialFit(data *[][]float64) {
     ipca.explainedVarianceRatio_ = explainedVarianceRatio[:ipca.nComponents_]
 }
 
-func (ipca *IPCA) Transform(data *[][]float64) {
+func (ipca *IPCA) Transform(data *[][]float64) *[][]float64 {
     // substract data by the mean
+    SubVecToMatInPlace(data, ipca.mean_, 0)
+
     // dot product between data and ipca.components_.T
+    return DotProduct(data, MatTranspose(&ipca.components_))
 }
