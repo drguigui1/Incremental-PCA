@@ -484,3 +484,117 @@ func TestExtractComponents2(t *testing.T) {
 		t.Errorf("ref %v\n", ref)
 	}
 }
+
+func TestMatTranspose1(t *testing.T) {
+	test := [][]float64{
+		{1,2,3,4,5},
+		{6,7,8,9,9},
+	}
+	ref := [][]float64{
+		{1, 6},
+		{2, 7},
+		{3, 8},
+		{4, 9},
+		{5, 9},
+	}
+
+	res := MatTranspose(&test)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestMatTranspose2(t *testing.T) {
+	test := [][]float64{
+		{1,2,3,4,5},
+		{6,7,8,9,9},
+		{1,0,4,0,11},
+	}
+	ref := [][]float64{
+		{1,6,1},
+    	{2,7,0},
+    	{3,8,4},
+    	{4,9,0},
+    	{5,9,11},
+	}
+
+	res := MatTranspose(&test)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test2\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestMatTranspose3(t *testing.T) {
+	test := [][]float64{
+		{1,2},
+	}
+	ref := [][]float64{
+		{1},
+    	{2},
+	}
+
+	res := MatTranspose(&test)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test3\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestDotProduct1(t *testing.T) {
+	m1 := [][]float64{
+		{1,2},
+	}
+	m2 := [][]float64{
+		{1},
+    	{2},
+	}
+
+	ref := [][]float64{
+		{5},
+	}
+
+	res := DotProduct(&m1, &m2)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test1\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}
+
+func TestDotProduct2(t *testing.T) {
+	m1 := [][]float64{
+		{1,2,3,4,5},
+		{6,7,8,9,9},
+		{1,0,4,0,11},
+	}
+	m2 := [][]float64{
+		{3,8},
+		{4,2},
+		{5,1},
+		{6,2},
+		{8,3},
+	}
+
+	ref := [][]float64{
+		{90,38},
+   		{212,115},
+    	{111,45},
+	}
+
+	res := DotProduct(&m1, &m2)
+
+	if !reflect.DeepEqual(ref, *res) {
+		t.Errorf("Error test2\n")
+		t.Errorf("res %v\n", *res)
+		t.Errorf("ref %v\n", ref)
+	}
+}

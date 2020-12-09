@@ -638,6 +638,41 @@ func ExtractComponents(vt *mat.Dense, nComponents int) *[][]float64 {
 }
 
 /*
+** Transpose matrice
+*/
+func MatTranspose(m *[][]float64) *[][]float64 {
+    dim1, dim2 := len(*m), len((*m)[0])
+    res := InitSlicesFloat64(dim2, dim1)
+
+    for i := 0; i < dim1; i++ {
+        for j := 0; j < dim2; j++ {
+            (*res)[j][i] = (*m)[i][j]
+        }
+    }
+    return res
+}
+
+/*
+** Dot product between two matrices (slice of slice)
+*/
+func DotProduct(m1 *[][]float64, m2 *[][]float64) *[][]float64 {
+    nbRowM1 := len(*m1)
+    nbRowM2 := len(*m2)
+    nbColM2 := len((*m2)[0])
+
+    res := InitSlicesFloat64(nbRowM1, nbColM2)
+
+    for i := 0; i < nbRowM1; i++ {
+        for j := 0; j < nbColM2; j++ {
+            for k := 0; k < nbRowM2; k++ {
+                (*res)[i][j] += (*m1)[i][k] * (*m2)[k][j]
+            }
+        }
+    }
+    return res
+}
+
+/*
 ** Sign correction to ensure deterministic output from SVD.
 ** Adjusts the columns of u and the rows of v such that the loadings in the
 ** columns in u that are largest in absolute value are always positive.

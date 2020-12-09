@@ -139,5 +139,6 @@ func (ipca *IPCA) PartialFit(data *[][]float64) {
 }
 
 func (ipca *IPCA) Transform(data *[][]float64) {
-    // TODO
+    // substract data by the mean
+    // dot product between data and ipca.components_.T
 }
