@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gonum.org/v1/gonum/mat"
+    "gonum.org/v1/gonum/mat"
     "math"
     "log"
     "fmt"
@@ -22,19 +22,19 @@ import (
 ** 'var_': Per-feature empirical variance, aggregate over calls to ``partial_fit``.
 **
 ** 'components_': Components with maximum variance.
-** 	shape=(nComponents_, nFeatures_)
+**     shape=(nComponents_, nFeatures_)
 **
 */
 type IPCA struct {
-	nFeatures_ int
-	nComponents_ int
-	nSampleSeen_ int
-	mean_ []float64
-	var_ []float64
-	components_ [][]float64
-	singularValues_ []float64
-	explainedVariance_ []float64
-	explainedVarianceRatio_ []float64
+    nFeatures_ int
+    nComponents_ int
+    nSampleSeen_ int
+    mean_ []float64
+    var_ []float64
+    components_ [][]float64
+    singularValues_ []float64
+    explainedVariance_ []float64
+    explainedVarianceRatio_ []float64
 
 }
 
@@ -42,19 +42,19 @@ type IPCA struct {
 ** Initialization of the Incremental PCA model
 */
 func InitIncrementalPCA(nComponents, nFeatures int) *IPCA {
-	// set mean and var to slice of 0
-	mean := make([]float64, nFeatures)
-	variance := make([]float64, nFeatures)
-	components := InitSlicesFloat64(nComponents, nFeatures)
-	singularValues := make([]float64, nComponents)
-	explainedVariance := make([]float64, nComponents)
-	explainedVarianceRatio := make([]float64, nComponents)
+    // set mean and var to slice of 0
+    mean := make([]float64, nFeatures)
+    variance := make([]float64, nFeatures)
+    components := InitSlicesFloat64(nComponents, nFeatures)
+    singularValues := make([]float64, nComponents)
+    explainedVariance := make([]float64, nComponents)
+    explainedVarianceRatio := make([]float64, nComponents)
 
-	newIPCA := IPCA{nFeatures, nComponents, 0,
-					mean, variance, *components,
-					singularValues, explainedVariance,
-					explainedVarianceRatio}
-	return &newIPCA
+    newIPCA := IPCA{nFeatures, nComponents, 0,
+                    mean, variance, *components,
+                    singularValues, explainedVariance,
+                    explainedVarianceRatio}
+    return &newIPCA
 }
 
 /*
@@ -75,45 +75,45 @@ func (ipca *IPCA) Print() {
 ** Update parameters of the incremental PCA
 */
 func (ipca *IPCA) PartialFit(data *[][]float64) {
-	nSamples := len(*data)
+    nSamples := len(*data)
 
-	// compute mean and var incrementally
+    // compute mean and var incrementally
     colMean, colVar, nTotalSamples := IncrementalMeanAndVar(*data, ipca.mean_, ipca.var_, ipca.nSampleSeen_)
 
-	// first path
-	if ipca.nSampleSeen_ == 0 {
+    // first path
+    if ipca.nSampleSeen_ == 0 {
         // data is directly modified in place
-		SubVecToMatInPlace(data, colMean, 0)
-	} else {
-		// compute col_batch_mean
+        SubVecToMatInPlace(data, colMean, 0)
+    } else {
+        // compute col_batch_mean
         colBatchMean := MeanMat(*data, 0)
         // data is directly modified in place
-		SubVecToMatInPlace(data, colBatchMean, 0)
+        SubVecToMatInPlace(data, colBatchMean, 0)
 
-		// mean correction
+        // mean correction
         sqrtTmp := math.Sqrt((float64(ipca.nSampleSeen_) / float64(nTotalSamples)) * float64(nSamples))
         //fmt.Println(Sub2Slices(ipca.mean_, colBatchMean))
         meanCorrectionTmp := MultSliceByConst(Sub2Slices(ipca.mean_, colBatchMean), sqrtTmp)
         //fmt.Println(meanCorrectionTmp)
 
-		// vstack
+        // vstack
         multCompSingValues := MultMatByVec(ipca.components_, ipca.singularValues_, 1)
         meanCorrection := [][]float64{ meanCorrectionTmp }
         data = Vstack(*multCompSingValues, *data, meanCorrection)
-	}
+    }
 
     // convert data into Dense
     dataDense := FromSliceFloatToMat(data)
 
     // SVD
     var svd mat.SVD
-	ok := svd.Factorize(dataDense, mat.SVDThin)
+    ok := svd.Factorize(dataDense, mat.SVDThin)
 
-	if !ok {
-    	log.Fatal("SVD Decomposition failed")
-	}
-	var u, v mat.Dense
-	svd.UTo(&u)
+    if !ok {
+        log.Fatal("SVD Decomposition failed")
+    }
+    var u, v mat.Dense
+    svd.UTo(&u)
     svd.VTo(&v)
     vt := mat.DenseCopyOf(v.T())
     values := svd.Values(nil)

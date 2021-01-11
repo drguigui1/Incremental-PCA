@@ -1,11 +1,11 @@
 package main
 
 import (
-	"io/ioutil"
-	"encoding/csv"
-	"os"
-	"strings"
-	"strconv"
+    "io/ioutil"
+    "encoding/csv"
+    "os"
+    "strings"
+    "strconv"
     "gonum.org/v1/gonum/mat"
     "math"
     "log"
@@ -62,30 +62,30 @@ func ToCSV(data [][]string, csv_path string) {
 ** Init Slice of slice
 */
 func InitSlicesFloat32(dim1, dim2 int) *[][]float32 {
-	newSlices := make([][]float32, dim1)
-	for i := 0; i < dim1; i++ {
-		newSlices[i] = make([]float32, dim2)
-	}
-	return &newSlices
+    newSlices := make([][]float32, dim1)
+    for i := 0; i < dim1; i++ {
+        newSlices[i] = make([]float32, dim2)
+    }
+    return &newSlices
 }
 
 /*
 ** Init Slice of slice
 */
 func InitSliceFloat64(dim1, dim2 int) *[]float64 {
-	newSlice := make([]float64, dim1 * dim2)
-	return &newSlice
+    newSlice := make([]float64, dim1 * dim2)
+    return &newSlice
 }
 
 /*
 ** Init Slice of slice
 */
 func InitSlicesFloat64(dim1, dim2 int) *[][]float64 {
-	newSlices := make([][]float64, dim1)
-	for i := 0; i < dim1; i++ {
-		newSlices[i] = make([]float64, dim2)
-	}
-	return &newSlices
+    newSlices := make([][]float64, dim1)
+    for i := 0; i < dim1; i++ {
+        newSlices[i] = make([]float64, dim2)
+    }
+    return &newSlices
 }
 
 /*
@@ -136,13 +136,13 @@ func ToFloat64Slices(slice *[][]string) *[][]float64 {
 ** NOT WORKING
 */
 func FromSliceToMat(slice *[][]string) *mat.Dense {
-	n_samples := len((*slice))
-	n_dims := len((*slice)[0])
+    n_samples := len((*slice))
+    n_dims := len((*slice)[0])
 
-	// flatten and convert the data
-	data := InitSliceFloat64(n_samples, n_dims)
+    // flatten and convert the data
+    data := InitSliceFloat64(n_samples, n_dims)
 
-	for i := 0; i < n_samples; i++ {
+    for i := 0; i < n_samples; i++ {
         for j := 0; j < n_dims; j++ {
             tmp, err := strconv.ParseFloat((*slice)[i][j], 64)
 
@@ -152,28 +152,28 @@ func FromSliceToMat(slice *[][]string) *mat.Dense {
 
             (*data)[i * n_dims + j] = tmp
         }
-	}
+    }
 
-	return mat.NewDense(n_samples, n_dims, *data)
+    return mat.NewDense(n_samples, n_dims, *data)
 }
 
 /*
 **
 */
 func FromSliceFloatToMat(slice *[][]float64) *mat.Dense {
-	n_samples := len((*slice))
-	n_dims := len((*slice)[0])
+    n_samples := len((*slice))
+    n_dims := len((*slice)[0])
 
-	// flatten and convert the data
-	data := make([]float64, n_samples * n_dims)
+    // flatten and convert the data
+    data := make([]float64, n_samples * n_dims)
 
-	for i := 0; i < n_samples; i++ {
+    for i := 0; i < n_samples; i++ {
         for j := 0; j < n_dims; j++ {
             data[i * n_dims + j] = (*slice)[i][j]
         }
-	}
+    }
 
-	return mat.NewDense(n_samples, n_dims, data)
+    return mat.NewDense(n_samples, n_dims, data)
 }
 
 /*
@@ -475,7 +475,7 @@ func MeanMat(m [][]float64, axis int) []float64 {
                 mean[idx] = elm
             } else {
                 // Incrementaly update mean
-				newMean := mean[idx] + (elm - mean[idx]) / float64(cpt)
+                newMean := mean[idx] + (elm - mean[idx]) / float64(cpt)
                 mean[idx] = newMean
             }
             if axis == 1 {
@@ -536,9 +536,9 @@ func VarMat(m [][]float64, axis int) []float64 {
                 sumSquareDiff[idx] = 0.
             } else {
                 // Incrementaly update mean
-				newMean := mean[idx] + (elm - mean[idx]) / float64(cpt)
+                newMean := mean[idx] + (elm - mean[idx]) / float64(cpt)
 
-				// Incrementaly update sum square diff
+                // Incrementaly update sum square diff
                 newSumSquare := sumSquareDiff[idx] + (elm - mean[idx]) * (elm - newMean)
 
                 mean[idx] = newMean
